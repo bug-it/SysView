@@ -119,7 +119,7 @@ def portas_abertas(ip):
 def cabecalho():
     print("\033c", end="")  # limpa a tela
     print(f"{AZUL}+{'=' * 65}+{RESET}")
-    print(f"{VERMELHO}              🔥 SYSVIEW - SISTEMA DE MONITORAMENTO INTERNO 🔥{RESET}")
+    print(f"{AMARELO}              🔥 {VERMELHO}SYSVIEW - SISTEMA DE MONITORAMENTO INTERNO {AMARELO}🔥{RESET}")
     print(f"{AZUL}+{'=' * 65}+{RESET}")
 
 def main():
