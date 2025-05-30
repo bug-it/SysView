@@ -97,8 +97,27 @@ def atualizacoes_disponiveis():
 def logs_criticos():
     return subprocess.getoutput("journalctl -p 3 -n 5 --no-pager") if tem_systemd() else "N/A"
 
+def portas_abertas(ip):
+    print(f"{CINZA}→ Escaneando portas abertas em {ip}...{RESET}")
+    try:
+        subprocess.run(["nmap", "--version"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        saida = subprocess.getoutput(f"nmap -sS -Pn -T4 {ip}")
+        linhas = saida.splitlines()
+        abertas = [l for l in linhas if "/tcp" in l and "open" in l]
+        return abertas if abertas else ["Nenhuma porta aberta detectada."]
+    except FileNotFoundError:
+        print(f"{AMARELO}[!] Nmap não encontrado. Usando verificação básica de portas padrão.{RESET}")
+        portas_comuns = [22, 80, 443, 3306, 8080]
+        abertas = []
+        for porta in portas_comuns:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                s.settimeout(0.5)
+                if s.connect_ex((ip, porta)) == 0:
+                    abertas.append(f"{porta}/tcp open (básico)")
+        return abertas if abertas else ["Nenhuma porta aberta detectada."]
+
 def cabecalho():
-    print("\033c", end="")  # clear
+    print("\033c", end="")  # limpa a tela
     print(f"{AZUL}+{'=' * 65}+{RESET}")
     print(f"{VERMELHO}              🔥 SYSVIEW - SISTEMA DE MONITORAMENTO INTERNO 🔥{RESET}")
     print(f"{AZUL}+{'=' * 65}+{RESET}")
@@ -109,6 +128,7 @@ def main():
     total_mem, total_swap = memoria_total_swap()
     fw_status, fw_regras = firewall_status()
     atualizacoes, lista_atualizacoes = atualizacoes_disponiveis()
+    ip = ip_local()
 
     print(f"\n{AZUL}:: RECURSOS DO SISTEMA ::{RESET}")
     print(f"{VERDE}→ DISCO TOTAL        : {AMARELO}{total_disco()}{RESET}")
@@ -122,7 +142,7 @@ def main():
     print(f"{VERDE}→ USO CPU            : {CINZA}{uso_cpu()}{RESET}")
 
     print(f"\n{AZUL}:: REDE ::{RESET}")
-    print(f"{VERDE}→ IP LOCAL           : {AMARELO}{ip_local()}{RESET}")
+    print(f"{VERDE}→ IP LOCAL           : {AMARELO}{ip}{RESET}")
     print(f"{VERDE}→ IP EXTERNO         : {AMARELO}{ip_externo()}{RESET}")
 
     print(f"\n{AZUL}:: FIREWALL (UFW) ::{RESET}")
@@ -145,6 +165,10 @@ def main():
     print(f"\n{AZUL}:: TOP 5 PASTAS MAIS CHEIAS EM / ::{RESET}")
     for linha in top_5_pastas():
         print(f"{AZUL}→ {linha}{RESET}")
+
+    print(f"\n{AZUL}:: PORTAS ABERTAS NO IP LOCAL ::{RESET}")
+    for porta in portas_abertas(ip):
+        print(f"{VERDE}→ {porta}{RESET}")
 
     print(f"\n{AZUL}+{'=' * 65}+{RESET}")
 
