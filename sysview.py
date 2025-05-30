@@ -100,7 +100,7 @@ def logs_criticos():
 def cabecalho():
     print("\033c", end="")  # clear
     print(f"{AZUL}+{'=' * 65}+{RESET}")
-    print(f"{VERMELHO}              🔥 DASHBOARD DO SISTEMA UBUNTU 🔥{RESET}")
+    print(f"{VERMELHO}              🔥 SYSVIEW - SISTEMA DE MONITORAMENTO INTERNO 🔥{RESET}")
     print(f"{AZUL}+{'=' * 65}+{RESET}")
 
 def main():
